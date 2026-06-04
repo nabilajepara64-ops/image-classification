@@ -1,0 +1,11 @@
+# Deep Learning & Machine Learning
+tensorflow==2.15.0
+
+# Data Manipulation & Arrays
+numpy==1.26.4
+
+# Image Processing
+pillow==10.3.0
+
+# Visualization
+matplotlib==3.8.4
