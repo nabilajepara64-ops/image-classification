@@ -1,68 +1,33 @@
-import streamlit as st
-import numpy as np
-import tensorflow as tf
-from PIL import Image
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-import os
+import json
 
-# ============================================================
-# 1. KONFIGURASI HALAMAN STREAMLIT
-# ============================================================
-st.set_page_config(page_title="Klasifikasi Kucing vs Kelinci", layout="centered")
+# Load the ipynb file and convert its code and markdown cells to a readable txt format
+with open('Image_Classification (2).ipynb', 'r', encoding='utf-8') as f:
+    notebook = json.load(f)
 
-st.title("🐱 Klasifikasi Kucing vs Kelinci 🐰")
-st.write("Unggah gambar hewan untuk memprediksi apakah itu Kucing atau Kelinci.")
+output_lines = []
 
-# ============================================================
-# 2. LOAD MODEL YANG SUDAH JADI (DENGAN CACHING)
-# ============================================================
-MODEL_PATH = "model_pet_cnn.keras"
+# Title banner
+output_lines.append("=" * 80)
+output_lines.append("JUPYTER NOTEBOOK EXPORT (.TXT)")
+output_lines.append(f"File Name: Image_Classification (2).ipynb")
+output_lines.append("=" * 80 + "\n")
 
-@st.cache_resource
-def load_my_model():
-    # Fungsi ini memastikan model hanya di-load sekali ke memori
-    if os.path.exists(MODEL_PATH):
-        return load_model(MODEL_PATH)
-    return None
+for i, cell in enumerate(notebook.get('cells', [])):
+    cell_type = cell.get('cell_type', '')
+    source = "".join(cell.get('source', []))
+    
+    if cell_type == 'markdown':
+        output_lines.append(f"--- [Cell {i+1}: Markdown] ---")
+        output_lines.append(source.strip())
+        output_lines.append("\n" + "-" * 40 + "\n")
+    elif cell_type == 'code':
+        output_lines.append(f"--- [Cell {i+1}: Code] ---")
+        output_lines.append(source.rstrip())
+        output_lines.append("\n" + "-" * 40 + "\n")
 
-model = load_my_model()
+# Save as a plain text file
+output_file_path = 'Image_Classification_2.txt'
+with open(output_file_path, 'w', encoding='utf-8') as f:
+    f.write("\n".join(output_lines))
 
-# Jika file model belum di-upload ke GitHub
-if model is None:
-    st.error(f"File '{MODEL_PATH}' tidak ditemukan di repositori GitHub Anda. Silakan upload file modelnya terlebih dahulu!")
-else:
-    # ============================================================
-    # 3. INTERFACES UPLOAD GAMBAR
-    # ============================================================
-    uploaded_file = st.file_uploader("Pilih gambar...", type=["jpg", "jpeg", "png"])
-
-    if uploaded_file is not None:
-        # Menampilkan gambar yang diunggah ke web
-        image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Gambar yang Diunggah", use_container_width=True)
-        
-        st.write("⏳ Sedang memproses prediksi...")
-
-        # Pemrosesan gambar agar sesuai input model
-        IMG_SIZE = (224, 224)
-        img_resized = image.resize(IMG_SIZE)
-        img_array = img_to_array(img_resized)
-        img_array = np.expand_dims(img_array, axis=0)
-        img_array = preprocess_input(img_array)
-
-        # Prediksi menggunakan model
-        hasil = model.predict(img_array)
-        nilai = hasil[0][0]
-
-        # ============================================================
-        # 4. MENAMPILKAN HASIL PREDIKSI KE USER
-        # ============================================================
-        st.subheader("Hasil Analisis:")
-        if nilai >= 0.5:
-            confidence = round(nilai * 100, 2)
-            st.success(f"Prediksi: **KUCING** ({confidence}%)")
-        else:
-            confidence = round((1 - nilai) * 100, 2)
-            st.info(f"Prediksi: **KELINCI** ({confidence}%)")
+print(f"File saved successfully to {output_file_path}")
