@@ -14,13 +14,13 @@ st.write("Unggah gambar untuk memprediksi apakah gambar tersebut merupakan Kucin
 @st.cache_resource
 def load_my_model():
     # Menggunakan compile=False karena model hanya digunakan untuk prediksi (Inference)
-    return tf.keras.models.load_model('model_klasifikasi.keras', compile=False)
+    return tf.keras.models.load_model('model_pet_cnn.keras', compile=False)
 
 try:
     model = load_my_model()
     st.success("Model AI berhasil dimuat!")
 except Exception as e:
-    st.error("Gagal memuat model. Pastikan file 'model_klasifikasi.keras' sudah Anda upload ke repositori GitHub yang sama dengan file ini.")
+    st.error("Gagal memuat model. Pastikan file 'model_pet_cnn.keras' sudah Anda upload ke repositori GitHub yang sama dengan file ini.")
     st.stop()
 
 # 2. FITUR UNGGAH GAMBAR OLEH USER
