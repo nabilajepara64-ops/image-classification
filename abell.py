@@ -127,11 +127,19 @@ model.compile(
     metrics=['accuracy']
 )
 
+import streamlit as st
+
 print("\nMemulai proses Training...")
-history = model.fit(
-    train_data,
-    validation_data=val_data,
-    epochs=20
+
+# Bungkus proses training dengan spinner Streamlit
+with st.spinner("Model sedang di-training... Mohon tunggu sampai 20 Epoch selesai."):
+    history = model.fit(
+        train_data,
+        validation_data=val_data,
+        epochs=20
+    )
+
+st.success("Training Selesai!")
 )
 
 # ============================================================
