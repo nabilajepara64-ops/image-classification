@@ -149,51 +149,36 @@ model.save(model_save_path)
 print(f"\nModel berhasil disimpan ke '{model_save_path}'")
 
 # ============================================================
-# 8. FUNGSI PREDIKSI
+# 8. INTERFACE STREAMLIT UNTUK PREDIKSI
 # ============================================================
-def prediksi_gambar(path_gambar):
-    if not os.path.exists(path_gambar):
-        print(f"File gambar uji '{path_gambar}' tidak ditemukan.")
-        return
+st.write("---") # Membuat garis pembatas di web
+st.header("🔮 Uji Prediksi Gambar")
 
-    img = load_img(path_gambar, target_size=(224, 224))
+# Membuat tombol upload gambar di halaman web Streamlit
+uploaded_file = st.file_uploader("Pilih gambar kucing atau kelinci...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    # Membuka dan menampilkan gambar yang di-upload ke layar web
+    img = Image.open(uploaded_file)
+    st.image(img, caption="Gambar yang Diunggah", use_container_width=True)
     
-    # Menampilkan gambar secara lokal (akan membuka jendela baru)
-    plt.imshow(img)
-    plt.axis("off")
-    plt.title(f"Prediksi untuk: {os.path.basename(path_gambar)}")
-    plt.show(block=False)  # Gunakan block=False agar tidak menghentikan jalannya kode
-
-    img_array = img_to_array(img)
+    # Preprocess gambar agar sesuai dengan input MobileNetV2
+    img_resized = img.resize((224, 224))
+    img_array = img_to_array(img_resized)
     img_array = np.expand_dims(img_array, axis=0)
-
-    # Preprocess khusus MobileNetV2
     img_array = preprocess_input(img_array)
-    hasil = model.predict(img_array)
-    nilai = hasil[0][0]
-
-    print("Nilai Prediksi :", nilai)
-
-    # 0 = Kelinci, 1 = Kucing
+    
+    # Melakukan prediksi dengan model
+    with st.spinner("Sedang menganalisis gambar..."):
+        hasil = model.predict(img_array)
+        nilai = hasil[0][0]
+    
+    # Menampilkan Hasil Prediksi ke layar web
+    st.subheader("Hasil Analisis:")
     if nilai >= 0.5:
-        print("Prediksi : KUCING")
-        print("Confidence :", round(nilai * 100, 2), "%")
+        st.error(f"Prediksi: **KUCING** (Confidence: {round(nilai * 100, 2)}%)")
     else:
-        print("Prediksi : KELINCI")
-        print("Confidence :", round((1 - nilai) * 100, 2), "%")
-
-# ============================================================
-# 9. PREDIKSI GAMBAR UJI
-# ============================================================
-print("\n==========================")
-print("HASIL PREDIKSI")
-print("==========================")
-
-print("\nGambar Uji 1")
-prediksi_gambar("Gambar Uji1.jpg")
-
-print("\nGambar Uji 2")
-prediksi_gambar("Gambar Uji2.jpg")
+        st.success(f"Prediksi: **KELINCI** (Confidence: {round((1 - nilai) * 100, 2)}%)")
 
 # Menjaga agar window plot matplotlib tidak langsung tertutup di akhir program
 plt.show()
