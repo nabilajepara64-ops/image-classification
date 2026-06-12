@@ -140,7 +140,6 @@ with st.spinner("Model sedang di-training... Mohon tunggu sampai 20 Epoch selesa
     )
 
 st.success("Training Selesai!")
-)
 
 # ============================================================
 # 7. SIMPAN MODEL
